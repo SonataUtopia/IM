@@ -2,7 +2,7 @@
 <script>
 
     function upload(dom) {
-        uploadfile("attach/upload", dom, function (res) {
+        uploadfile("attach/Upload", dom, function (res) {
             if (res.Code == 0) {
                 app.sendpicmsg(res.Data)
             }
@@ -10,7 +10,7 @@
     }
     //上传图片 创建群
     function uploadthis(dom) {
-        uploadfile("attach/upload", dom, function (res) {
+        uploadfile("attach/Upload", dom, function (res) {
             if (res.Code == 0) {
                 app.com.icon = res.Data;
                 console.log(res.Data);
@@ -19,7 +19,7 @@
     }
     //维护用户头像
     function uploadUserInfo(dom) {
-        uploadfile("attach/upload", dom, function (res) {
+        uploadfile("attach/Upload", dom, function (res) {
             if (res.Code == 0) {
                 app.info.icon = res.Data;
                 console.log(res.Data);
@@ -195,7 +195,7 @@
                             //是否可用
                             this.recorder.ondataavailable = (event) => {
                                 console.log("ondataavailable");
-                                uploadblob("attach/upload", event.data, ".mp3", res => {
+                                uploadblob("attach/Upload", event.data, ".mp3", res => {
                                     var duration = Math.ceil((new Date().getTime() - this.duration) / 1000);
                                     this.sendaudiomsg(res.Data, duration);
                                 })
