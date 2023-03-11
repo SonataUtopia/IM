@@ -166,6 +166,8 @@
                     document.getElementById('audio4play').play();
                 },
                 startrecorder: function () {
+                    event.preventDefault()
+                    console.log("startrecorder")
                     let audioTarget = document.getElementById('audio');
                     var types = ["video/webm",
                         "audio/webm",
