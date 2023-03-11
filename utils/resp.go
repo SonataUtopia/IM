@@ -53,6 +53,6 @@ func RespOK(w http.ResponseWriter, data interface{}, msg string) {
 	Resp(w, 0, data, msg)
 }
 
-func RespOkList(w http.ResponseWriter, data interface{}, total interface{}) {
+func RespOKList(w http.ResponseWriter, data interface{}, total interface{}) {
 	RespList(w, 0, data, total)
 }

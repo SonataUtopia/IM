@@ -226,5 +226,18 @@ func SearchFriends(c *gin.Context) {
 	// 	"message": "查询好友成功",
 	// 	"data":    users,
 	// })
-	utils.RespOkList(c.Writer, users, len(users))
+	utils.RespOKList(c.Writer, users, len(users))
+}
+
+func AddFriend(c *gin.Context) {
+	userId, _ := strconv.Atoi(c.Request.FormValue("userId"))
+	targetName := c.Request.FormValue("targetName")
+	code, msg := models.AddFriend(uint(userId), targetName)
+	if code == 0 {
+		utils.RespOK(c.Writer, code, msg)
+
+	} else {
+		fmt.Println("userId:", userId, "\ttargetId:", targetName, "\tcode:", code)
+		utils.RespFail(c.Writer, msg)
+	}
 }
