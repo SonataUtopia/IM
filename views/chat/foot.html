@@ -500,7 +500,7 @@
                 },
                 loadcommunitys: function () {
                     var that = this;
-                    post("contact/loadcommunity", { ownerId: userId() }, function (res) {
+                    post("contact/LoadCommunity", { ownerId: userId() }, function (res) {
                         that.communitys = res.Rows || [];
                     })
                 },
@@ -555,7 +555,7 @@
                     //console.log("createcommunity")
                     this.com.ownerId = userId()
                     console.log(this.com)
-                    util.post("/contact/createCommunity", this.com).then(res => {
+                    util.post("/contact/CreateCommunity", this.com).then(res => {
                         console.log(res)
                         if (res.Code != 0) {
                             mui.toast(res.Msg)
@@ -600,7 +600,7 @@
                         this.setTimeFlag();
                         var that = this;
                         console.log(that);
-                        post("contact/joinGroup", { comId: dstobj, "userId": userId() }, function (res) {
+                        post("contact/JoinGroup", { comId: dstobj, "userId": userId() }, function (res) {
                             if (res.Code == 0) {
                                 mui.toast("添加成功");
 

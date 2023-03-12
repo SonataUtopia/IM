@@ -237,7 +237,50 @@ func AddFriend(c *gin.Context) {
 		utils.RespOK(c.Writer, code, msg)
 
 	} else {
-		fmt.Println("userId:", userId, "\ttargetId:", targetName, "\tcode:", code)
 		utils.RespFail(c.Writer, msg)
 	}
+}
+
+func CreateCommunity(c *gin.Context) {
+	ownerId, _ := strconv.Atoi(c.Request.FormValue("ownerId"))
+	name := c.Request.FormValue("name")
+	community := models.Community{
+		OwnerId: uint(ownerId),
+		Name:    name,
+	}
+	// fmt.Println("name:", name, "\tcomName:", community.Name)
+
+	code, msg := models.CreateCommunity(community)
+	if code == 0 {
+		utils.RespOK(c.Writer, code, msg)
+
+	} else {
+		utils.RespFail(c.Writer, msg)
+	}
+
+}
+
+func JoinGroups(c *gin.Context) {
+	userId, _ := strconv.Atoi(c.Request.FormValue("userId"))
+	comId := c.Request.FormValue("comId")
+
+	//	name := c.Request.FormValue("name")
+	data, msg := models.JoinGroup(uint(userId), comId)
+	if data == 0 {
+		utils.RespOK(c.Writer, data, msg)
+	} else {
+		utils.RespFail(c.Writer, msg)
+	}
+}
+
+func LoadCommunity(c *gin.Context) {
+	ownerId, _ := strconv.Atoi(c.Request.FormValue("ownerId"))
+	data, msg := models.LoadCommunity(uint(ownerId))
+	if len(data) != 0 {
+		utils.RespList(c.Writer, 0, data, msg)
+
+	} else {
+		utils.RespFail(c.Writer, msg)
+	}
+
 }
