@@ -159,6 +159,7 @@ func UpdateUser(c *gin.Context) {
 	user.Name = c.PostForm("name")
 	user.Password = c.PostForm("password")
 	user.Phone = c.PostForm("phone")
+	user.Avatar = c.PostForm("icon")
 	user.Email = c.PostForm("email")
 
 	_, err := govalidator.ValidateStruct(user)
@@ -254,9 +255,13 @@ func AddFriend(c *gin.Context) {
 func CreateCommunity(c *gin.Context) {
 	ownerId, _ := strconv.Atoi(c.Request.FormValue("ownerId"))
 	name := c.Request.FormValue("name")
+	icon := c.Request.FormValue("icon")
+	desc := c.Request.FormValue("memo")
 	community := models.Community{
 		OwnerId: uint(ownerId),
 		Name:    name,
+		Icon:    icon,
+		Desc:    desc,
 	}
 	// fmt.Println("name:", name, "\tcomName:", community.Name)
 
