@@ -40,7 +40,7 @@ func AddFriend(userId uint, targetName string) (int, string) {
 	if targetName != "" {
 		user = FindUserByName(targetName)
 		if user.Name != "" {
-			if targetName == user.Name {
+			if userId == user.ID {
 				return -1, "不能添加自己"
 			}
 			contactCheck := Contact{}

@@ -23,7 +23,7 @@ type Message struct {
 	gorm.Model
 	UserId     int64
 	TargetId   int64
-	Type       int    //消息类型			1.私聊	2.群聊	3.广播
+	Type       int    //消息类型			1.私聊	2.群聊
 	Media      int    //消息内容类型		1.文字	2.表情包	3.图片	4.音频
 	Content    string //消息内容
 	CreateTime uint64 //创建时间
@@ -59,7 +59,6 @@ func Chat(writer http.ResponseWriter, request *http.Request) {
 	query := request.URL.Query()
 	id := query.Get("userId")
 	userId, _ := strconv.ParseInt(id, 10, 64)
-	// fmt.Println("Id,userId-------------------------------------------------------", id, userId)
 	// msgType := query.Get("msgType")
 	// targetId := query.Get("targetId")
 	// context := query.Get("context")
@@ -88,20 +87,20 @@ func Chat(writer http.ResponseWriter, request *http.Request) {
 	clientMap[userId] = node
 	rwLocker.Unlock()
 
+	//更新心跳
+	node.Heartbeat(uint64(time.Now().Unix()))
+
 	//发送消息
 	go SendProc(node)
 
 	//接收消息
 	go RecvProc(node)
-
-	SendMsg(userId, []byte("欢迎来到聊天室"))
 }
 
 func SendProc(node *Node) {
 	for {
 		select {
 		case data := <-node.DataQueue:
-			fmt.Println("[ws]sendProc >>>> msg :", string(data))
 			err := node.Conn.WriteMessage(websocket.TextMessage, data)
 			if err != nil {
 				fmt.Println(err)
@@ -120,7 +119,6 @@ func RecvProc(node *Node) {
 		}
 		Dispatch(data)
 		BroadMsg(data)
-		// fmt.Println("[ws] <<<<<", data)
 	}
 }
 
@@ -133,7 +131,6 @@ func BroadMsg(data []byte) {
 func init() {
 	go udpSendProc()
 	go udpRecvProc()
-	fmt.Println("init goroutine ")
 }
 
 // 完成udp发送协程
@@ -149,7 +146,6 @@ func udpSendProc() {
 	for {
 		select {
 		case data := <-udpsendChan:
-			// fmt.Println("udpSendProc  data :", string(data))
 			_, err := con.Write(data)
 			if err != nil {
 				fmt.Println(err)
@@ -178,14 +174,12 @@ func udpRecvProc() {
 			fmt.Println(err)
 			return
 		}
-		// fmt.Println("udpRecvProc  data :", string(buf[0:n]))
 		Dispatch(buf[0:n])
 	}
 }
 
 // 后端调度逻辑处理
 func Dispatch(data []byte) {
-	// fmt.Println("Dispatch onnnnnnnnnnn!!!")
 	msg := Message{}
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
@@ -197,10 +191,6 @@ func Dispatch(data []byte) {
 		SendMsg(msg.TargetId, data)
 	case 2: //群发
 		SendGroupMsg(msg.TargetId, data)
-		// case 3://广播
-		// 	sendAllMsg()
-		// case 4:
-
 	}
 }
 
@@ -284,9 +274,9 @@ func (msg Message) MarshalBinary() ([]byte, error) {
 
 // 获取缓存里面的消息
 func RedisMsg(userIdA int64, userIdB int64, start int64, end int64, isRev bool) []string {
-	rwLocker.RLock()
-	//node, ok := clientMap[userIdA]
-	rwLocker.RUnlock()
+	// rwLocker.RLock()
+	// node, ok := clientMap[userIdA]
+	// rwLocker.RUnlock()
 	//jsonMsg := Message{}
 	//json.Unmarshal(msg, &jsonMsg)
 	ctx := context.Background()
@@ -327,8 +317,7 @@ func (node *Node) Heartbeat(currentTime uint64) {
 }
 
 // 清理超时连接
-func CleanConnection(param interface{}) (result bool) {
-	result = true
+func CleanConnection(param interface{}) bool {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("cleanConnection err", r)
@@ -340,17 +329,16 @@ func CleanConnection(param interface{}) (result bool) {
 	for i := range clientMap {
 		node := clientMap[i]
 		if node.IsHeartbeatTimeOut(currentTime) {
-			fmt.Println("心跳超时..... 关闭连接：", node)
 			node.Conn.Close()
+			return false
 		}
 	}
-	return result
+	return true
 }
 
 // 用户心跳是否超时
 func (node *Node) IsHeartbeatTimeOut(currentTime uint64) (timeout bool) {
 	if node.HeartbeatTime+viper.GetUint64("timeout.HeartbeatMaxTime") <= currentTime {
-		fmt.Println("心跳超时...自动下线", node)
 		timeout = true
 	}
 	return
