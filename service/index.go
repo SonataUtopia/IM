@@ -19,7 +19,7 @@ func GetIndex(c *gin.Context) {
 	}
 	ind.Execute(c.Writer, "index")
 	// c.JSON(200, gin.H{
-	// 	"message": "pong",
+	// 	"Msg": "pong",
 	// })
 }
 
@@ -30,7 +30,7 @@ func ToRegister(c *gin.Context) {
 	}
 	ind.Execute(c.Writer, "register")
 	// c.JSON(200, gin.H{
-	// 	"message": "pong",
+	// 	"Msg": "pong",
 	// })
 }
 
@@ -56,7 +56,7 @@ func ToChat(c *gin.Context) {
 
 	ind.Execute(c.Writer, "chat")
 	// c.JSON(200, gin.H{
-	// 	"message": "pong",
+	// 	"Msg": "pong",
 	// })
 }
 

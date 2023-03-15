@@ -1,7 +1,7 @@
 {{define "/chat/head.shtml"}}
 <script>
     function userId(id){
-        if(typeof  id =="undefined"){
+        if(typeof  id == "undefined"){
             var r = sessionStorage.getItem("userid");
             if(!r){
                 return 0;
@@ -13,7 +13,7 @@
         }
     }
     function userInfo(o){
-        if(typeof  o =="undefined"){
+        if(typeof  o == "undefined"){
             var r = sessionStorage.getItem("userinfo");
             if(!!r){
                 return JSON.parse(r);

@@ -139,22 +139,25 @@
 
             },
             created: function () {
+                var user = userInfo();
+                this.initUser();
                 this.loadfriends();
                 this.loadcommunitys();
                 this.loaddoutures();
                 setInterval(this.heartbeat, 10 * 1000);
-                var user = userInfo()
                 //初始化websocket
-                this.initwebsocket()
-                this.initUser();
+                this.initwebsocket();
 
             },
             mounted: function () {
 
             },
             methods: {
-                initUser() {
+                initUser(){
                     let userInfo = JSON.parse(sessionStorage.getItem('userinfo') || '{}');
+                    console.log(userInfo.Avatar);
+                    console.log(userInfo.Name);
+                    console.log(userInfo.ID);
                     this.info.icon = userInfo.Avatar;
                     this.info.name = userInfo.Name;
                     this.info.id = userInfo.ID;
@@ -533,6 +536,7 @@
                             if (res.Code == 0) {
                                 mui.toast("添加成功");
                                 that.loadfriends();
+                                this.win = "main"
                             } else {
                                 mui.toast(res.Msg);
                             }
@@ -554,17 +558,14 @@
                 createcommunity() {
                     //console.log("createcommunity")
                     this.com.ownerId = userId()
-                    console.log(this.com)
                     util.post("/contact/CreateCommunity", this.com).then(res => {
                         console.log(res)
-                        if (res.Code != 0) {
+                        if (res.Code == 0) {
                             mui.toast(res.Msg)
-                        } else {
-                            //location.replace("localhost:8081")
-                            //location.href = "/"
-                            mui.toast("建群成功")
                             this.loadcommunitys();
-                            //goBack()
+                            this.win = "main"
+                        } else {
+                            mui.toast(res.Msg)
                         }
                     })
                 },
@@ -577,13 +578,11 @@
                         userInfo.Avatar = this.info.icon;
                         userInfo.Name = this.info.name;
                         sessionStorage.setItem('userinfo', JSON.stringify(userInfo))
-                        if (res.Code != 0) {
-                            mui.toast(res.message)
+                        if (res.Code == 0) {
+                            mui.toast(res.Msg)
+                            this.win = "main"
                         } else {
-                            //location.replace("localhost:8081")
-                            //location.href = "/"
-                            mui.toast("修改成功")
-                            //goBack()
+                            mui.toast(res.Msg)
                         }
                     })
                 },
@@ -603,8 +602,8 @@
                         post("contact/JoinGroup", { comId: dstobj, "userId": userId() }, function (res) {
                             if (res.Code == 0) {
                                 mui.toast("添加成功");
-
                                 that.loadcommunitys();
+                                this.win = "main"
                             } else {
                                 mui.toast(res.Msg);
                             }

@@ -55,16 +55,17 @@
                 //封装了promis
                 util.post("user/login", this.user).then(res => {
                     console.log(res)
-                    if (res.code != 0) {
-                        mui.toast(res.msg)
-                    } else {
-                        var url = "/chat/index.shtml?id=" + res.data.id
-                            + "&token=" + res.data.token
-                        userInfo(res.data)
-                        userId(res.data.id)
-                        // localStorage.setItem('userInfo', JSON.stringify(res.data))
+                    if (res.Code == 0) {
+                        var url = "/chat/index.shtml?id=" + res.Data.id
+                            + "&token=" + res.Data.token
+                        userInfo(res.Data)
+                        userId(res.Data.id)
+                        mui.toast(res.Msg)
+                        // localStorage.setItem('userInfo', JSON.stringify(res.Data))
                         location.href = url
                         //mui.alert(url)
+                    } else {
+                        mui.toast(res.Msg)
                     }
                 })
             },

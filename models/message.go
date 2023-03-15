@@ -213,6 +213,7 @@ func SendMsg(userId int64, msg []byte) {
 		if ok {
 			fmt.Println("sendMsg >>> userID: ", userId, "  msg:", string(msg))
 			node.DataQueue <- msg
+			node.Heartbeat(uint64(time.Now().Unix()))
 		}
 	}
 	var key string
@@ -243,27 +244,6 @@ func SendGroupMsg(targetId int64, msg []byte) {
 			SendMsg(int64(userIds[i]), msg)
 		}
 
-	}
-}
-
-func JoinGroup(userId uint, comId string) (int, string) {
-	contact := Contact{
-		OwnerId: userId,
-		Type:    2,
-	}
-	community := Community{}
-
-	utils.DB.Where("id=? or name=?", comId, comId).Find(&community)
-	if community.Name == "" {
-		return -1, "没有找到群"
-	}
-	utils.DB.Where("owner_id=? and target_id=? and type =2 ", userId, comId).Find(&contact)
-	if !contact.CreatedAt.IsZero() {
-		return -1, "已加过此群"
-	} else {
-		contact.TargetId = community.ID
-		utils.DB.Create(&contact)
-		return 0, "加群成功"
 	}
 }
 

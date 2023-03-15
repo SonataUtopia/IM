@@ -17,7 +17,7 @@ import (
 // GetUserList
 // @Summary 所有用户
 // @Tags 用户模块
-// @Success 200 {string} json{"code", "message"}
+// @Success 200 {string} json{"Code", "message"}
 // @Router /user/getUserList [post]
 func GetUserList(c *gin.Context) {
 	// data := make([]*models.UserBasic, 10)
@@ -25,7 +25,7 @@ func GetUserList(c *gin.Context) {
 
 	models.GetUserList()
 	c.JSON(200, gin.H{
-		"message": data,
+		"Msg": data,
 	})
 }
 
@@ -34,7 +34,7 @@ func GetUserList(c *gin.Context) {
 // @Tags 用户模块
 // @param name formData string false "用户名"
 // @param password formData string false "密码"
-// @Success 200 {string} json{"code", "message"}
+// @Success 200 {string} json{"Code", "message"}
 // @Router /user/FindUserByNameAndPassword [post]
 func FindUserByNameAndPassword(c *gin.Context) {
 	// data := models.UserBasic{}
@@ -43,9 +43,9 @@ func FindUserByNameAndPassword(c *gin.Context) {
 	user := models.FindUserByName(name)
 	if user.Name == "" {
 		c.JSON(200, gin.H{
-			"code":    -1,
-			"message": "用户不存在",
-			"data":    user,
+			"Code": -1,
+			"Msg":  "用户不存在",
+			"Data": user,
 		})
 		return
 	}
@@ -53,9 +53,9 @@ func FindUserByNameAndPassword(c *gin.Context) {
 	flag := utils.ValidPassword(password, user.Salt, user.Password)
 	if !flag {
 		c.JSON(200, gin.H{
-			"code":    -1,
-			"message": "密码不正确",
-			"data":    user,
+			"Code": -1,
+			"Msg":  "密码不正确",
+			"Data": user,
 		})
 		return
 	}
@@ -63,9 +63,9 @@ func FindUserByNameAndPassword(c *gin.Context) {
 	data := models.FindUserByNameAndPassword(name, pwd)
 
 	c.JSON(200, gin.H{
-		"code":    0,
-		"message": "登录成功",
-		"data":    data,
+		"Code": 0,
+		"Msg":  "登录成功",
+		"Data": data,
 	})
 }
 
@@ -75,7 +75,7 @@ func FindUserByNameAndPassword(c *gin.Context) {
 // @param name formData string false "用户名"
 // @param password formData string false "密码"
 // @param repassword formData string false "确认密码"
-// @Success 200 {string} json{"code", "message"}
+// @Success 200 {string} json{"Code", "message"}
 // @Router /user/CreateUser [post]
 func CreateUser(c *gin.Context) {
 	user := models.UserBasic{}
@@ -84,18 +84,18 @@ func CreateUser(c *gin.Context) {
 	repassword := c.Request.FormValue("repassword")
 	if user.Name == "" || password == "" || repassword == "" {
 		c.JSON(200, gin.H{
-			"code":    -1,
-			"message": "用户名、密码不能为空",
-			"data":    user,
+			"Code": -1,
+			"Msg":  "用户名、密码不能为空",
+			"Data": user,
 		})
 		return
 	}
 	if password != repassword {
 		// fmt.Println(password, "|", repassword)
 		c.JSON(200, gin.H{
-			"code":    -1,
-			"message": "两次密码不一致",
-			"data":    user,
+			"Code": -1,
+			"Msg":  "两次密码不一致",
+			"Data": user,
 		})
 		return
 	}
@@ -105,9 +105,9 @@ func CreateUser(c *gin.Context) {
 	data := models.FindUserByName(user.Name)
 	if data.Name != "" {
 		c.JSON(200, gin.H{
-			"code":    -1,
-			"message": "用户名已被使用",
-			"data":    data,
+			"Code": -1,
+			"Msg":  "用户名已被使用",
+			"Data": data,
 		})
 		return
 	}
@@ -118,9 +118,9 @@ func CreateUser(c *gin.Context) {
 	// utils.DB.Create(user)
 	models.CreateUser(user) //原案
 	c.JSON(200, gin.H{
-		"code":    0,
-		"message": "密码正确",
-		"data":    user,
+		"Code": 0,
+		"Msg":  "密码正确",
+		"Data": user,
 	})
 }
 
@@ -128,7 +128,7 @@ func CreateUser(c *gin.Context) {
 // @Summary 删除用户
 // @Tags 用户模块
 // @param id formData string false "用户ID"
-// @Success 200 {string} json{"code", "message"}
+// @Success 200 {string} json{"Code", "message"}
 // @Router /user/DeleteUser [post]
 func DeleteUser(c *gin.Context) {
 	user := models.UserBasic{}
@@ -136,9 +136,9 @@ func DeleteUser(c *gin.Context) {
 	user.ID = uint(id)
 	models.DeleteUser(user)
 	c.JSON(200, gin.H{
-		"code":    0,
-		"message": "删除用户成功",
-		"data":    user,
+		"Code": 0,
+		"Msg":  "删除用户成功",
+		"Data": user,
 	})
 }
 
@@ -150,7 +150,7 @@ func DeleteUser(c *gin.Context) {
 // @param password formData string false "新密码"
 // @param phone formData string false "新手机号码"
 // @param email formData string false "新邮箱"
-// @Success 200 {string} json{"code", "message"}
+// @Success 200 {string} json{"Code", "message"}
 // @Router /user/UpdateUser [post]
 func UpdateUser(c *gin.Context) {
 	user := models.UserBasic{}
@@ -165,18 +165,18 @@ func UpdateUser(c *gin.Context) {
 	_, err := govalidator.ValidateStruct(user)
 	if err != nil {
 		c.JSON(200, gin.H{
-			"code":    -1,
-			"message": "格式不匹配",
-			"data":    user,
+			"Code": -1,
+			"Msg":  "格式不匹配",
+			"Data": user,
 		})
 		return
 	}
 
 	models.UpdateUser(user)
 	c.JSON(200, gin.H{
-		"code":    0,
-		"message": "修改用户成功",
-		"data":    user,
+		"Code": 0,
+		"Msg":  "修改用户成功",
+		"Data": user,
 	})
 }
 
@@ -233,9 +233,9 @@ func SearchFriends(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Request.FormValue("userId"))
 	users := models.SearchFriend(uint(id))
 	// c.JSON(200, gin.H{
-	// 	"code":    0,
-	// 	"message": "查询好友成功",
-	// 	"data":    users,
+	// 	"Code":    0,
+	// 	"Msg": "查询好友成功",
+	// 	"Data":    users,
 	// })
 	utils.RespOKList(c.Writer, users, len(users))
 }
@@ -243,9 +243,9 @@ func SearchFriends(c *gin.Context) {
 func AddFriend(c *gin.Context) {
 	userId, _ := strconv.Atoi(c.Request.FormValue("userId"))
 	targetName := c.Request.FormValue("targetName")
-	code, msg := models.AddFriend(uint(userId), targetName)
-	if code == 0 {
-		utils.RespOK(c.Writer, code, msg)
+	Code, msg := models.AddFriend(uint(userId), targetName)
+	if Code == 0 {
+		utils.RespOK(c.Writer, Code, msg)
 
 	} else {
 		utils.RespFail(c.Writer, msg)
@@ -263,11 +263,10 @@ func CreateCommunity(c *gin.Context) {
 		Icon:    icon,
 		Desc:    desc,
 	}
-	// fmt.Println("name:", name, "\tcomName:", community.Name)
 
-	code, msg := models.CreateCommunity(community)
-	if code == 0 {
-		utils.RespOK(c.Writer, code, msg)
+	Code, msg := models.CreateCommunity(community)
+	if Code == 0 {
+		utils.RespOK(c.Writer, Code, msg)
 
 	} else {
 		utils.RespFail(c.Writer, msg)

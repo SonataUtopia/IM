@@ -64,6 +64,7 @@ func AddFriend(userId uint, targetName string) (int, string) {
 				Type:     1,
 			}
 			if err := utils.DB.Create(&contact).Error; err != nil {
+				fmt.Println(err)
 				tx.Rollback()
 				return -1, "添加好友失败"
 			}
@@ -73,6 +74,7 @@ func AddFriend(userId uint, targetName string) (int, string) {
 				Type:     1,
 			}
 			if err := utils.DB.Create(&contactAnother).Error; err != nil {
+				fmt.Println(err)
 				tx.Rollback()
 				return -1, "添加好友失败"
 			}

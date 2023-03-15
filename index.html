@@ -50,12 +50,12 @@
                 //封装了promis
                 util.post("user/FindUserByNameAndPassword",this.user).then(res=>{
                     console.log(res)
-                    if(res.code!=0){
-                        mui.toast(res.message)
+                    if(res.Code!=0){
+                        mui.toast(res.Msg)
                     }else{         
-                        var url = "/ToChat?userId="+res.data.ID+"&token="+res.data.Identity
-                        // userInfo(res.data)
-                        // userId(res.data.ID)
+                        var url = "/ToChat?userId="+res.Data.ID+"&token="+res.Data.Identity
+                        userInfo(res.Data)
+                        userId(res.Data.ID)
                         mui.toast("登录成功,即将跳转")
                         location.href = url
                         // location.href = "ToChat"
