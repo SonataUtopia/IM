@@ -14,11 +14,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// GetUserList
-// @Summary 所有用户
-// @Tags 用户模块
-// @Success 200 {string} json{"Code", "message"}
-// @Router /user/getUserList [post]
 func GetUserList(c *gin.Context) {
 	// data := make([]*models.UserBasic, 10)
 	data := models.GetUserList()
@@ -29,13 +24,6 @@ func GetUserList(c *gin.Context) {
 	})
 }
 
-// FindUserByNameAndPassword
-// @Summary 查找用户
-// @Tags 用户模块
-// @param name formData string false "用户名"
-// @param password formData string false "密码"
-// @Success 200 {string} json{"Code", "message"}
-// @Router /user/FindUserByNameAndPassword [post]
 func FindUserByNameAndPassword(c *gin.Context) {
 	// data := models.UserBasic{}
 	name := c.Request.FormValue("name")
@@ -69,14 +57,13 @@ func FindUserByNameAndPassword(c *gin.Context) {
 	})
 }
 
-// CreateUser
-// @Summary 新增用户
-// @Tags 用户模块
-// @param name formData string false "用户名"
-// @param password formData string false "密码"
-// @param repassword formData string false "确认密码"
-// @Success 200 {string} json{"Code", "message"}
-// @Router /user/CreateUser [post]
+func FindUserByID(c *gin.Context) {
+	userId, _ := strconv.Atoi(c.Request.FormValue("userId"))
+
+	data := models.FindUserByID(uint(userId))
+	utils.RespOK(c.Writer, data, "ok")
+}
+
 func CreateUser(c *gin.Context) {
 	user := models.UserBasic{}
 	user.Name = c.Request.FormValue("name")
@@ -112,11 +99,9 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	// user.Password = password
 	user.Password = utils.MakePassword(password, salt)
 	user.Salt = salt
-	// utils.DB.Create(user)
-	models.CreateUser(user) //原案
+	models.CreateUser(user)
 	c.JSON(200, gin.H{
 		"Code": 0,
 		"Msg":  "密码正确",
@@ -124,12 +109,6 @@ func CreateUser(c *gin.Context) {
 	})
 }
 
-// DeleteUser
-// @Summary 删除用户
-// @Tags 用户模块
-// @param id formData string false "用户ID"
-// @Success 200 {string} json{"Code", "message"}
-// @Router /user/DeleteUser [post]
 func DeleteUser(c *gin.Context) {
 	user := models.UserBasic{}
 	id, _ := strconv.Atoi(c.Request.FormValue("id"))
@@ -142,16 +121,6 @@ func DeleteUser(c *gin.Context) {
 	})
 }
 
-// UpdateUser
-// @Summary 修改用户
-// @Tags 用户模块
-// @param id formData string false "用户ID"
-// @param name formData string false "新用户名"
-// @param password formData string false "新密码"
-// @param phone formData string false "新手机号码"
-// @param email formData string false "新邮箱"
-// @Success 200 {string} json{"Code", "message"}
-// @Router /user/UpdateUser [post]
 func UpdateUser(c *gin.Context) {
 	user := models.UserBasic{}
 	id, _ := strconv.Atoi(c.PostForm("id"))
@@ -229,14 +198,9 @@ func RedisMsg(c *gin.Context) {
 	utils.RespOKList(c.Writer, "ok", res)
 }
 
-func SearchFriends(c *gin.Context) {
+func LoadFriends(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Request.FormValue("userId"))
-	users := models.SearchFriend(uint(id))
-	// c.JSON(200, gin.H{
-	// 	"Code":    0,
-	// 	"Msg": "查询好友成功",
-	// 	"Data":    users,
-	// })
+	users := models.LoadFriend(uint(id))
 	utils.RespOKList(c.Writer, users, len(users))
 }
 
@@ -278,7 +242,6 @@ func JoinGroups(c *gin.Context) {
 	userId, _ := strconv.Atoi(c.Request.FormValue("userId"))
 	comId := c.Request.FormValue("comId")
 
-	//	name := c.Request.FormValue("name")
 	data, msg := models.JoinGroup(uint(userId), comId)
 	if data == 0 {
 		utils.RespOK(c.Writer, data, msg)

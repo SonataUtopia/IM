@@ -12,7 +12,7 @@ type Contact struct {
 	gorm.Model
 	OwnerId  uint
 	TargetId uint
-	Type     int //关系类型	1.好友	2.群组	3.
+	Type     int //关系类型			1.好友	2.群聊
 	Desc     string
 }
 
@@ -20,7 +20,8 @@ func (table *Contact) TableName() string {
 	return "contact"
 }
 
-func SearchFriend(userId uint) []UserBasic {
+// 加载好友列表
+func LoadFriend(userId uint) []UserBasic {
 	contacts := make([]Contact, 0)
 	objIds := make([]uint64, 0)
 	utils.DB.Where("owner_id = ? and type = 1", userId).Find(&contacts)
@@ -86,6 +87,7 @@ func AddFriend(userId uint, targetName string) (int, string) {
 	return -1, "好友姓名不能为空"
 }
 
+// 搜寻同群用户
 func SearchUserByGroupId(communityId uint) []uint {
 	contacts := make([]Contact, 0)
 	objIds := make([]uint, 0)

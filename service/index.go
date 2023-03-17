@@ -8,19 +8,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetIndex
-// @Tags 首页
-// @Success 200 {string} welcome
-// @Router /index [get]
 func GetIndex(c *gin.Context) {
 	ind, err := template.ParseFiles("index.html", "views/chat/head.html")
 	if err != nil {
 		panic(err)
 	}
 	ind.Execute(c.Writer, "index")
-	// c.JSON(200, gin.H{
-	// 	"Msg": "pong",
-	// })
 }
 
 func ToRegister(c *gin.Context) {
@@ -29,9 +22,6 @@ func ToRegister(c *gin.Context) {
 		panic(err)
 	}
 	ind.Execute(c.Writer, "register")
-	// c.JSON(200, gin.H{
-	// 	"Msg": "pong",
-	// })
 }
 
 func ToChat(c *gin.Context) {
@@ -55,9 +45,6 @@ func ToChat(c *gin.Context) {
 	user.Identity = token
 
 	ind.Execute(c.Writer, "chat")
-	// c.JSON(200, gin.H{
-	// 	"Msg": "pong",
-	// })
 }
 
 func Chat(c *gin.Context) {

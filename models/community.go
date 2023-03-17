@@ -15,6 +15,11 @@ type Community struct {
 	Desc    string
 }
 
+func (table *Community) TableName() string {
+	return "communities"
+}
+
+// 建群
 func CreateCommunity(community Community) (int, string) {
 	if len(community.Name) == 0 {
 		return -1, "群名称不能为空"
@@ -60,6 +65,7 @@ func CreateCommunity(community Community) (int, string) {
 	return 0, "创建成功"
 }
 
+// 加群
 func JoinGroup(userId uint, comId string) (int, string) {
 	contact := Contact{
 		OwnerId: userId,
@@ -81,6 +87,7 @@ func JoinGroup(userId uint, comId string) (int, string) {
 	}
 }
 
+// 加载群列表
 func LoadCommunity(ownerId uint) ([]*Community, string) {
 	contacts := make([]Contact, 0)
 	objIds := make([]uint64, 0)
@@ -94,6 +101,5 @@ func LoadCommunity(ownerId uint) ([]*Community, string) {
 	for _, v := range data {
 		fmt.Println(v)
 	}
-	// utils.DB.Where()
 	return data, "加载成功"
 }

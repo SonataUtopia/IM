@@ -1,21 +1,16 @@
 package router
 
 import (
-	"github.com/SonataUtopia/IM/docs"
 	"github.com/SonataUtopia/IM/service"
 	"github.com/gin-gonic/gin"
-	swaggerfiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func Router() *gin.Engine {
 	r := gin.Default()
-	//swagger
-	docs.SwaggerInfo.BasePath = ""
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	//静态资源
 	r.Static("/asset", "asset/")
+	r.StaticFile("/favicon.ico", "asset/images/favicon.ico")
 	r.LoadHTMLGlob("views/**/*")
 
 	//首页
@@ -24,7 +19,7 @@ func Router() *gin.Engine {
 	r.GET("/ToRegister", service.ToRegister)
 	r.GET("/ToChat", service.ToChat)
 	r.GET("/Chat", service.Chat)
-	r.POST("/SearchFriends", service.SearchFriends)
+	r.POST("/LoadFriends", service.LoadFriends)
 
 	//用户模块
 	r.POST("/user/GetUserList", service.GetUserList)
@@ -32,12 +27,13 @@ func Router() *gin.Engine {
 	r.POST("/user/DeleteUser", service.DeleteUser)
 	r.POST("/user/UpdateUser", service.UpdateUser)
 	r.POST("/user/FindUserByNameAndPassword", service.FindUserByNameAndPassword)
+	r.POST("/user/FindUserByID", service.FindUserByID)
 
 	//发送消息
 	r.GET("/user/SendMsg", service.SendMsg)
 	r.GET("/user/SendUserMsg", service.SendUserMsg)
-	r.POST("/attach/Upload", service.Upload)
 	r.POST("/user/redisMsg", service.RedisMsg)
+	r.POST("/attach/Upload", service.Upload)
 
 	//社交关系
 	r.POST("/contact/Addfriend", service.AddFriend)

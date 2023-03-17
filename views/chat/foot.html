@@ -431,7 +431,7 @@
                     console.log(">>>> " + userid)
                     var userinfo = this.usermap[userid];
                     if (!userinfo) {
-                        post("user/find", { userId: parseInt(userid) }, function (res) {
+                        post("user/FindUserByID", { userId: parseInt(userid) }, function (res) {
                             cb(res.Data);
                             this.usermap[userid] = res.Data;
                         }.bind(this))
@@ -491,7 +491,7 @@
                 },
                 loadfriends: function () {
                     var that = this;
-                    post("SearchFriends", { userId: userId() }, function (res) {
+                    post("LoadFriends", { userId: userId() }, function (res) {
                         that.friends = res.Rows || [];
                         var usermap = this.usermap;
                         for (var i in res.Rows) {
