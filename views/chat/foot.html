@@ -466,9 +466,7 @@
                     this.webSocket = new WebSocket(url);
                     //消息处理
                     this.webSocket.onmessage = function (evt) {
-                        console.log("onmessage", evt.data)
                         if (evt.data.indexOf("}") > -1) {
-                            console.log("recv json <==" + evt.data)
                             this.onmessage(JSON.parse(evt.data));
                         } else {
                             console.log("recv<==" + evt.data)

@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 上传图片
 func Upload(c *gin.Context) {
 	w := c.Writer
 	req := c.Request

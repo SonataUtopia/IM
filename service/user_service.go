@@ -3,19 +3,16 @@ package service
 import (
 	"fmt"
 	"math/rand"
-	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/SonataUtopia/IM/models"
 	"github.com/SonataUtopia/IM/utils"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 )
 
+// 获取用户列表
 func GetUserList(c *gin.Context) {
-	// data := make([]*models.UserBasic, 10)
 	data := models.GetUserList()
 
 	models.GetUserList()
@@ -24,6 +21,7 @@ func GetUserList(c *gin.Context) {
 	})
 }
 
+// 通过用户名与密码寻找用户
 func FindUserByNameAndPassword(c *gin.Context) {
 	// data := models.UserBasic{}
 	name := c.Request.FormValue("name")
@@ -57,6 +55,7 @@ func FindUserByNameAndPassword(c *gin.Context) {
 	})
 }
 
+// 通过ID寻找用户
 func FindUserByID(c *gin.Context) {
 	userId, _ := strconv.Atoi(c.Request.FormValue("userId"))
 
@@ -109,6 +108,7 @@ func CreateUser(c *gin.Context) {
 	})
 }
 
+// 删除用户
 func DeleteUser(c *gin.Context) {
 	user := models.UserBasic{}
 	id, _ := strconv.Atoi(c.Request.FormValue("id"))
@@ -121,6 +121,7 @@ func DeleteUser(c *gin.Context) {
 	})
 }
 
+// 更新用户信息
 func UpdateUser(c *gin.Context) {
 	user := models.UserBasic{}
 	id, _ := strconv.Atoi(c.PostForm("id"))
@@ -149,45 +150,7 @@ func UpdateUser(c *gin.Context) {
 	})
 }
 
-// 防止跨域站点伪造请求
-var upGrade = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
-
-func SendMsg(c *gin.Context) {
-	ws, err := upGrade.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer func(ws *websocket.Conn) {
-		err = ws.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(ws)
-	MsgHandler(ws, c)
-}
-
-func MsgHandler(ws *websocket.Conn, c *gin.Context) {
-	msg, err := utils.Subscribe(c, utils.PublishKey)
-	if err != nil {
-		fmt.Println(err)
-	}
-	tm := time.Now().Format("2006-01-02 15:04:05")
-	m := fmt.Sprintf("[ws][%s]:%s", tm, msg)
-	err = ws.WriteMessage(1, []byte(m))
-	if err != nil {
-		fmt.Println("MsgHandler error:", err)
-	}
-}
-
-func SendUserMsg(c *gin.Context) {
-	models.Chat(c.Writer, c.Request)
-}
-
+// 加载消息记录
 func RedisMsg(c *gin.Context) {
 	userIdA, _ := strconv.Atoi(c.PostForm("userIdA"))
 	userIdB, _ := strconv.Atoi(c.PostForm("userIdB"))
@@ -198,12 +161,14 @@ func RedisMsg(c *gin.Context) {
 	utils.RespOKList(c.Writer, "ok", res)
 }
 
+// 加载好友列表
 func LoadFriends(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Request.FormValue("userId"))
 	users := models.LoadFriend(uint(id))
 	utils.RespOKList(c.Writer, users, len(users))
 }
 
+// 添加好友
 func AddFriend(c *gin.Context) {
 	userId, _ := strconv.Atoi(c.Request.FormValue("userId"))
 	targetName := c.Request.FormValue("targetName")
@@ -216,6 +181,7 @@ func AddFriend(c *gin.Context) {
 	}
 }
 
+// 创建群聊
 func CreateCommunity(c *gin.Context) {
 	ownerId, _ := strconv.Atoi(c.Request.FormValue("ownerId"))
 	name := c.Request.FormValue("name")
@@ -238,6 +204,7 @@ func CreateCommunity(c *gin.Context) {
 
 }
 
+// 加入群聊
 func JoinGroups(c *gin.Context) {
 	userId, _ := strconv.Atoi(c.Request.FormValue("userId"))
 	comId := c.Request.FormValue("comId")
@@ -250,6 +217,7 @@ func JoinGroups(c *gin.Context) {
 	}
 }
 
+// 加载群聊列表
 func LoadCommunity(c *gin.Context) {
 	ownerId, _ := strconv.Atoi(c.Request.FormValue("ownerId"))
 	data, msg := models.LoadCommunity(uint(ownerId))
@@ -259,5 +227,4 @@ func LoadCommunity(c *gin.Context) {
 	} else {
 		utils.RespFail(c.Writer, msg)
 	}
-
 }

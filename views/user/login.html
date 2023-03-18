@@ -57,7 +57,7 @@
                     console.log(res)
                     if (res.Code == 0) {
                         var url = "/chat/index.shtml?id=" + res.Data.id
-                            + "&token=" + res.Data.token
+                            + "&token=" + res.Data.Identity
                         userInfo(res.Data)
                         userId(res.Data.id)
                         mui.toast(res.Msg)

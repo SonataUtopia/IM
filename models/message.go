@@ -52,11 +52,24 @@ var rwLocker sync.RWMutex
 // 聊天功能启动
 func Chat(writer http.ResponseWriter, request *http.Request) {
 	query := request.URL.Query()
+
+	token := query.Get("token")
 	id := query.Get("userId")
 	userId, _ := strconv.ParseInt(id, 10, 64)
+
+	//token检验
+	var isValida bool
+	user := UserBasic{}
+	utils.DB.Where("id = ?", userId).First(&user)
+	if user.Identity == token {
+		isValida = true
+	} else {
+		isValida = false
+	}
+
 	conn, err := (&websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
-			return true
+			return isValida
 		},
 	}).Upgrade(writer, request, nil)
 	if err != nil {
@@ -81,21 +94,7 @@ func Chat(writer http.ResponseWriter, request *http.Request) {
 
 }
 
-// 发送消息
-func SendProc(node *Node) {
-	for {
-		select {
-		case data := <-node.DataQueue:
-			err := node.Conn.WriteMessage(websocket.TextMessage, data)
-			if err != nil {
-				fmt.Println("sendProc write error:", err)
-				return
-			}
-		}
-	}
-}
-
-// 接受消息
+// 读消息
 func RecvProc(node *Node) {
 	for {
 		_, data, err := node.Conn.ReadMessage()
@@ -115,16 +114,22 @@ func RecvProc(node *Node) {
 			node.Heartbeat(currentTime)
 		} else {
 			Dispatch(data)
-			BroadMsg(data)
 		}
-
 	}
 }
 
-var udpsendChan chan []byte = make(chan []byte, 1024)
-
-func BroadMsg(data []byte) {
-	udpsendChan <- data
+// 写消息
+func SendProc(node *Node) {
+	for {
+		select {
+		case data := <-node.DataQueue:
+			err := node.Conn.WriteMessage(websocket.TextMessage, data)
+			if err != nil {
+				fmt.Println("sendProc write error:", err)
+				return
+			}
+		}
+	}
 }
 
 // 后端调度逻辑处理
@@ -144,14 +149,15 @@ func Dispatch(data []byte) {
 	}
 }
 
-func SendMsg(userId int64, msg []byte) {
+// 对单发送消息
+func SendMsg(targetId int64, msg []byte) {
 	rwLocker.RLock()
-	node, ok := clientMap[userId]
+	node, ok := clientMap[targetId]
 	rwLocker.RUnlock()
 	jsonMsg := Message{}
 	json.Unmarshal(msg, &jsonMsg)
 	ctx := context.Background()
-	targetIdStr := strconv.Itoa(int(userId))
+	targetIdStr := strconv.Itoa(int(targetId))
 	userIdStr := strconv.Itoa(int(jsonMsg.UserId))
 	jsonMsg.CreateTime = uint64(time.Now().Unix())
 	if ok {
@@ -161,7 +167,7 @@ func SendMsg(userId int64, msg []byte) {
 
 	//存储消息记录
 	var key string
-	if userId > jsonMsg.UserId {
+	if targetId > jsonMsg.UserId {
 		key = "msg_" + userIdStr + "_" + targetIdStr
 	} else {
 		key = "msg_" + targetIdStr + "_" + userIdStr
@@ -177,6 +183,7 @@ func SendMsg(userId int64, msg []byte) {
 	}
 }
 
+// 群发消息
 func SendGroupMsg(targetId int64, msg []byte) {
 	userIds := SearchUserByGroupId(uint(targetId))
 	for i := 0; i < len(userIds); i++ {
@@ -184,7 +191,6 @@ func SendGroupMsg(targetId int64, msg []byte) {
 		if targetId != int64(userIds[i]) {
 			SendMsg(int64(userIds[i]), msg)
 		}
-
 	}
 }
 

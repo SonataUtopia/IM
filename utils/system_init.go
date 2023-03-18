@@ -41,14 +41,6 @@ func InitMySQL() {
 	)
 
 	DB, _ = gorm.Open(mysql.Open(viper.GetString("mysql.dns")), &gorm.Config{Logger: newLogger})
-	// if err != nil {
-	// 	fmt.Println("err:", err)
-	// }
-	// // Create
-	// user := &models.UserBasic{}
-	// user.Name = "createByUntils"
-	// DB.Create(user)
-	// DB.Model(user).Update("password", "123aaa")
 }
 
 func InitRedis() {
@@ -59,12 +51,6 @@ func InitRedis() {
 		PoolSize:     viper.GetInt("redis.poolsize"),
 		MinIdleConns: viper.GetInt("redis.minIdleConn"),
 	})
-	// pong, err := Red.Ping().Result()
-	// if err != nil {
-	// 	fmt.Println("err:", err)
-	// } else {
-	// 	fmt.Println("conn complete", pong)
-	// }
 }
 
 const (
@@ -72,7 +58,6 @@ const (
 )
 
 func Publish(ctx context.Context, channel string, msg string) error {
-	// var err error
 	err := Red.Publish(ctx, channel, msg).Err()
 	if err != nil {
 		fmt.Println(err)
