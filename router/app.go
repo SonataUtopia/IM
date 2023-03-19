@@ -30,7 +30,7 @@ func Router() *gin.Engine {
 	r.POST("/user/FindUserByID", service.FindUserByID)
 
 	//社交模块
-	r.POST("/user/redisMsg", service.RedisMsg)
+	r.POST("/user/GetMsgLogging", service.GetMsgLogging)
 	r.POST("/attach/Upload", service.Upload)
 	r.POST("/contact/Addfriend", service.AddFriend)
 	r.POST("/contact/CreateCommunity", service.CreateCommunity)

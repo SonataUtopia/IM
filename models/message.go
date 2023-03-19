@@ -156,67 +156,98 @@ func SendMsg(targetId int64, msg []byte) {
 	rwLocker.RUnlock()
 	jsonMsg := Message{}
 	json.Unmarshal(msg, &jsonMsg)
-	ctx := context.Background()
-	targetIdStr := strconv.Itoa(int(targetId))
-	userIdStr := strconv.Itoa(int(jsonMsg.UserId))
 	jsonMsg.CreateTime = uint64(time.Now().Unix())
+	userId := int64(jsonMsg.UserId)
+	// userIdStr := strconv.Itoa(int(jsonMsg.UserId))
+	// targetIdStr := strconv.Itoa(int(targetId))
 	if ok {
 		node.DataQueue <- msg
 		node.Heartbeat(uint64(time.Now().Unix()))
 	}
-
-	//存储消息记录
-	var key string
-	if targetId > jsonMsg.UserId {
-		key = "msg_" + userIdStr + "_" + targetIdStr
-	} else {
-		key = "msg_" + targetIdStr + "_" + userIdStr
-	}
-	res, err := utils.Red.ZRevRange(ctx, key, 0, -1).Result()
-	if err != nil {
-		fmt.Println("res error:", err)
-	}
-	score := float64(cap(res)) + 1
-	_, e := utils.Red.ZAdd(ctx, key, &redis.Z{score, msg}).Result() //jsonMsg
-	if e != nil {
-		fmt.Println("ress error:", e)
-	}
+	SaveMsgLogging(userId, targetId, msg, false)
 }
 
 // 群发消息
 func SendGroupMsg(targetId int64, msg []byte) {
+	jsonMsg := Message{}
+	json.Unmarshal(msg, &jsonMsg)
+	jsonMsg.CreateTime = uint64(time.Now().Unix())
+	comId := int64(jsonMsg.TargetId)
 	userIds := SearchUserByGroupId(uint(targetId))
+
 	for i := 0; i < len(userIds); i++ {
-		//排除给自己的
-		if targetId != int64(userIds[i]) {
-			SendMsg(int64(userIds[i]), msg)
+		rwLocker.RLock()
+		node, ok := clientMap[int64(userIds[i])]
+		rwLocker.RUnlock()
+		// targetIdStr := strconv.Itoa(int(userIds[i]))
+		if ok {
+			node.DataQueue <- msg
+			node.Heartbeat(uint64(time.Now().Unix()))
 		}
+		// SendMsg(int64(userIds[i]), context, targetId)
+		// }
+	}
+
+	SaveMsgLogging(comId, 0, msg, true)
+}
+
+// 存储消息记录
+func SaveMsgLogging(userId int64, targetId int64, msg []byte, isCom bool) {
+	userIdStr := strconv.Itoa(int(userId))
+	targetIdStr := strconv.Itoa(int(targetId))
+
+	var key string
+	if !isCom {
+		if userId > targetId {
+			key = "msg_" + targetIdStr + "_" + userIdStr
+		} else {
+			key = "msg_" + userIdStr + "_" + targetIdStr
+		}
+	} else {
+		key = "msg_" + userIdStr
+	}
+
+	ctx := context.Background()
+	res, err := utils.Red.ZRevRange(ctx, key, 0, -1).Result()
+	if err != nil {
+		fmt.Println("zRevRange error:", err)
+	}
+
+	score := float64(cap(res)) + 1
+	_, e := utils.Red.ZAdd(ctx, key, &redis.Z{score, msg}).Result()
+	if e != nil {
+		fmt.Println("ZAdd error:", e)
 	}
 }
 
 // 获取缓存里面的消息
-func RedisMsg(userIdA int64, userIdB int64, start int64, end int64, isRev bool) []string {
+func GetMsgLogging(userId int64, targetId int64, start int64, end int64, isCom bool, isRev bool) []string {
 	ctx := context.Background()
-	userIdStr := strconv.Itoa(int(userIdA))
-	targetIdStr := strconv.Itoa(int(userIdB))
+	userIdStr := strconv.Itoa(int(userId))
+	targetIdStr := strconv.Itoa(int(targetId))
+
 	var key string
-	if userIdA > userIdB {
-		key = "msg_" + targetIdStr + "_" + userIdStr
+	if !isCom {
+		if userId > targetId {
+			key = "msg_" + targetIdStr + "_" + userIdStr
+		} else {
+			key = "msg_" + userIdStr + "_" + targetIdStr
+		}
 	} else {
-		key = "msg_" + userIdStr + "_" + targetIdStr
+		key = "msg_" + userIdStr
 	}
 
-	var rels []string
+	var res []string
 	var err error
 	if isRev {
-		rels, err = utils.Red.ZRange(ctx, key, start, end).Result()
+		res, err = utils.Red.ZRange(ctx, key, start, end).Result()
 	} else {
-		rels, err = utils.Red.ZRevRange(ctx, key, start, end).Result()
+		res, err = utils.Red.ZRevRange(ctx, key, start, end).Result()
 	}
 	if err != nil {
-		fmt.Println(err) //没有找到
+		fmt.Println(err)
 	}
-	return rels
+	return res
 }
 
 // 更新用户心跳

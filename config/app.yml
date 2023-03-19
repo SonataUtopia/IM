@@ -4,15 +4,9 @@ mysql:
 redis:
   addr: "192.168.31.85:6379"
   password: ""
-  DB: 0
+  DB: 1
   poolSize: 30
   minIdleConn: 30
-
-oss:
-  Endpoint: "oss-cn-hangzhou.aliyuncs.com"
-  AccessKeyId: "LTAI5tNCXPJwS3MstKoKgixh"
-  AccessKeySecret: "YhHE8OyCMsqfjwOnxQ1oO7paYlDjVHX"
-  Bucket : "ginchat"
 
 timeout:
   DelayHeartbeat: 10   #延迟心跳时间  单位秒

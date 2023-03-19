@@ -77,7 +77,8 @@
                     choosed: { "pkgid": "emoj", "assets": [], "size": "small" }
                 },
                 msglist: [],
-                isReadRedisMsg: [],  //是否已读取某个用户的缓存消息
+                isReadUserMsgLogging: [], 
+                isReadComMsgLogging: [],  
                 msgcontext: {
                     TargetId: -1,
                     Type: -1,
@@ -155,9 +156,6 @@
             methods: {
                 initUser(){
                     let userInfo = JSON.parse(sessionStorage.getItem('userinfo') || '{}');
-                    console.log(userInfo.Avatar);
-                    console.log(userInfo.Name);
-                    console.log(userInfo.ID);
                     this.info.icon = userInfo.Avatar;
                     this.info.name = userInfo.Name;
                     this.info.id = userInfo.ID;
@@ -223,7 +221,6 @@
                     }
                     this.showprocess = false
                     console.log("stoprecorder")
-
                 },
                 dispatchplugin: function (item) {
                     switch (item.id) {
@@ -232,7 +229,7 @@
 
                             break;
                         default:
-                            mui.toast("系统暂不支持,请自行扩展")
+                            mui.toast("系统暂不支持")
                     }
                 },
                 reset: function () {
@@ -254,7 +251,6 @@
                         this.$http.get(res[id]).then(response => {
                             pkginfo = response.data
                             var baseurl = config.baseurl + "/" + pkginfo.id + "/"
-                            // console.log("post res[i]",id,res[id],pkginfo)
                             for (var j in pkginfo.assets) {
                                 pkginfo.assets[j] = baseurl + pkginfo.assets[j];
                             }
@@ -267,19 +263,12 @@
                         })
                     }
                 },
-                showweixin: function () {
-                    mui.alert("请加微信号msb-shenzhuan索取")
-                },
                 showmsg: function (user, msg, isReverse, isFirst) {
-                    //console.log(">>>>>>>>>>>", user)
-                    // console.log(">>>>>>>>>>>", msg)
                     var data = {
                     }
                     data.ismine = userId() == msg.userId;
-                    //console.log(data.ismine,userId(),msg.userid)
                     data.user = user;
                     data.msg = msg;
-                    console.log(this.msglist)
                     if (isReverse) {
                         this.msglist = [data].concat(this.msglist);
                     } else {
@@ -304,9 +293,6 @@
                         } else {
                             document.querySelector("#convo .mui-scroll").style.transform = 'translateY(' + 0 + 'px)';
                         }
-
-
-
                         clearTimeout(that.timer)
                     }, 100)
                 },
@@ -317,7 +303,6 @@
                 sendtxtmsg: function (txt) {
                     if (this.isDisable) {
                         this.setTimeFlag()
-                        //{id:1,userid:2,dstid:3,cmd:10,media:1,content:"hello"}
                         var msg = this.createmsgcontext();
                         msg.Media = 1;
                         msg.Content = txt;
@@ -331,7 +316,6 @@
                 sendpicmsg: function (picurl) {
                     if (this.isDisable) {
                         this.setTimeFlag()
-                        //{id:1,userid:2,dstid:3,cmd:10,media:4,url:"http://www.baidu.com/a/log,jpg"}
                         var msg = this.createmsgcontext();
                         msg.Media = 4;
                         msg.url = picurl;
@@ -344,7 +328,6 @@
                 sendaudiomsg: function (url, num) {
                     if (this.isDisable) {
                         this.setTimeFlag()
-                        //{id:1,userid:2,dstid:3,cmd:10,media:3,url:"http://www.a,com/dsturl.mp3",anount:40}
                         var msg = this.createmsgcontext();
                         msg.Media = 3;
                         msg.url = url;
@@ -352,12 +335,8 @@
                         if (msg.Type == 1) {
                             this.showmsg(userInfo(), msg);
                         }
-                        //console.log("sendaudiomsg",this.msglist);
                         this.webSocket.send(JSON.stringify(msg))
                     }
-                },
-                scrollConcat() {
-                    console.log(123)
                 },
                 closePanel() {
                     this.panelstat = 'kbord';
@@ -367,18 +346,17 @@
                     this.end = 9;
                     if (this.isDisable) {
                         //首次读取某个用户的消息记录
-                        if (this.isReadRedisMsg.filter(item => item === user.ID).length <= 0) {
-                            post("user/redisMsg", { userIdA: userId(), userIdB: user.ID, start: this.start, end: this.end, isRev: false }, function (res) {
+                        if (this.isReadUserMsgLogging.filter(item => item === user.ID).length <= 0) {
+                            post("user/GetMsgLogging", { userId: userId(), targetId: user.ID, start: this.start, end: this.end, isCom:false, isRev: false }, function (res) {
                                 //循环读取的消息记录 并显示
                                 for (var i in res.Total) {
                                     this.showmsg(user, JSON.parse(res.Total[i]), false, true)
                                 }
                             }.bind(this))
-                            this.isReadRedisMsg.push(user.ID)
+                            this.isReadUserMsgLogging.push(user.ID)
                         }
 
                         this.setTimeFlag()
-                        //console.log(user)
                         this.win = "single";
                         this.title = "和" + user.Name + "聊天中";
                         this.otherAvatar = user.Avatar;
@@ -390,7 +368,7 @@
                             startX: 0, //初始化时滚动至x
                             startY: 0, //初始化时滚动至y
                             indicators: true, //是否显示滚动条
-                            deceleration: 0.0006, //阻尼系数,系数越小滑动越灵敏
+                            deceleration: 0.002, //阻尼系数,系数越小滑动越灵敏
                             bounce: true //是否启用回弹
                         });
                         //下拉获取历史消息记录
@@ -401,7 +379,7 @@
                                     this.isLoadMore = true;
                                     this.start = this.end + 1;
                                     this.end = this.end + 2;
-                                    post("user/redisMsg", { userIdA: userId(), userIdB: user.ID, start: this.start, end: this.end, isRev: false }, function (res) {
+                                    post("user/GetMsgLogging", { userId: userId(), targetId: user.ID, start: this.start, end: this.end, isCom: false, isRev: false }, function (res) {
                                         //循环读取的消息记录 并显示
                                         for (var i in res.Total) {
                                             this.showmsg(user, JSON.parse(res.Total[i]), true)
@@ -410,7 +388,7 @@
                                             this.isLoadMore = false;
                                         }, 300);
                                     }.bind(this))
-                                    this.isReadRedisMsg.push(user.ID)
+                                    this.isReadUserMsgLogging.push(user.ID)
                                 }
                             }
                         })
@@ -418,17 +396,62 @@
                 },
                 //群聊的初始化
                 groupmsg: function (group) {
+                    this.start = 0;
+                    this.end = 9;
                     if (this.isDisable) {
+                        //首次读取某个用户的消息记录
+                        if (this.isReadComMsgLogging.filter(item => item === group.ID).length <= 0) {
+                            post("user/GetMsgLogging", { userId: group.ID, targetId: group.ID, start: this.start, end: this.end, isCom:true, isRev: false }, function (res) {
+                                //循环读取的消息记录 并显示
+                                for (var i in res.Total) {
+                                    msg = JSON.parse(res.Total[i])
+                                    this.showmsg(msg.userId, msg, false, true)
+                                }
+                            }.bind(this))
+                            this.isReadComMsgLogging.push(group.ID)
+                        }
+
                         this.setTimeFlag()
                         this.win = "group";
                         this.title = group.Name;
                         this.msgcontext.TargetId = parseInt(group.ID);
                         this.msgcontext.Type = 2;
+                        
+                        mui('.mui-scroll-wrapper').scroll({
+                            scrollY: true, //是否竖向滚动
+                            scrollX: false, //是否横向滚动
+                            startX: 0, //初始化时滚动至x
+                            startY: 0, //初始化时滚动至y
+                            indicators: true, //是否显示滚动条
+                            deceleration: 0.002, //阻尼系数,系数越小滑动越灵敏
+                            bounce: true //是否启用回弹
+                        });
+                        //下拉获取历史消息记录
+                        document.querySelector('.mui-scroll-wrapper').addEventListener('scroll', (e) => {
+                            let translate = e.target.style?.transform?.match(/translate3d\(\d+px,\s*(\d+)px,\s*(\d+)px\)/i);
+                            if (translate && translate.length > 1) {
+                                if (translate[1] > 0 && this.isLoadMore == false) {
+                                    this.isLoadMore = true;
+                                    this.start = this.end + 1;
+                                    this.end = this.end + 2;
+                                    post("user/GetMsgLogging", { userId: group.ID, targetId: group.ID, start: this.start, end: this.end, isCom: true, isRev: false }, function (res) {
+                                        //循环读取的消息记录 并显示
+                                        for (var i in res.Total) {
+                                            msg = JSON.parse(res.Total[i])
+                                            this.showmsg(msg.userId, msg,true)
+                                        }
+                                        setTimeout(() => {
+                                            this.isLoadMore = false;
+                                        }, 300);
+                                    }.bind(this))
+                                    this.isReadComMsgLogging.push(group.ID)
+                                }
+                            }
+                        })
                     }
                 },
                 loaduserinfo: function (userid, cb) {
                     userid = "" + userid;
-                    console.log(">>>> " + userid)
                     var userinfo = this.usermap[userid];
                     if (!userinfo) {
                         post("user/FindUserByID", { userId: parseInt(userid) }, function (res) {
@@ -480,12 +503,6 @@
                     this.webSocket.onerror = function (evt) {
                         console.log(evt.data)
                     }
-                    /*{
-                        this.webSocket.send()
-                    }*/
-                },
-                sendmsg: function () {
-
                 },
                 loadfriends: function () {
                     var that = this;
@@ -506,29 +523,18 @@
                     })
                 },
                 addfriend: function () {
-                    //console.log("addfriend....")
                     var that = this;
                     mui.prompt('', '请输入好友名称', '加好友', ['取消', '确认'], function (e) {
                         if (e.index == 1) {
-                            //判断数字
-                            //if (isNaN(e.value) || e.value <= 0) {
-                            //    mui.toast('格式错误');
-                            //} else {
-                            //mui.toast(e.value);
                             that._addfriend(e.value)
-                            //}
-                        } else {
-                            //mui.toast('您取消了入库');
                         }
                     }, 'div');
                     document.querySelector('.mui-popup-input input').type = 'text';
-
                 },
                 _addfriend: function (dstobj) {
                     //防止一次点击 穿透访问多次
                     if (this.isDisable) {
                         this.setTimeFlag()
-                        //console.log("_addfriend....")
                         var that = this
                         post("contact/Addfriend", { targetName: dstobj, userId: userId() }, function (res) {
                             if (res.Code == 0) {
@@ -544,17 +550,13 @@
                 //个人资料修改显示
                 setUserInfo: function () {
                     this.win = "userinfo"
-                    //  console.log("createCom")
                 },
                 //新建群显示
                 createCom: function () {
                     this.win = "community"
-                    //  console.log("createCom")
                 },
-
                 //新建群提交
                 createcommunity() {
-                    //console.log("createcommunity")
                     this.com.ownerId = userId()
                     util.post("/contact/CreateCommunity", this.com).then(res => {
                         console.log(res)
@@ -568,7 +570,6 @@
                     })
                 },
                 updateUserInfo() {
-                    //console.log("createcommunity")
                     this.info.id = userId()
                     util.post("/user/UpdateUser", this.info).then(res => {
                         console.log(res)
@@ -584,14 +585,9 @@
                         }
                     })
                 },
-
-
-
-                //回到聊天首页
                 goBack() {
                     this.win = "main"
                 },
-
                 _joincomunity: function (dstobj) {
                     if (this.isDisable) {
                         this.setTimeFlag();
@@ -612,14 +608,7 @@
                     var that = this;
                     mui.prompt('', '请输入群号或者群名称', '加群', ['取消', '确认'], function (e) {
                         if (e.index == 1) {
-                            //    if (isNaN(e.value) || e.value <= 0) {
-                            //       mui.toast('格式错误');
-                            //   } else {
-                            //mui.toast(e.value);
                             that._joincomunity(e.value)
-                            // }
-                        } else {
-                            //mui.toast('您取消了入库');
                         }
                     }, 'div');
                     document.querySelector('.mui-popup-input input').type = 'text';
@@ -641,7 +630,6 @@
                         msg.Media = -1;
                         msg.Type = 3
                         msg.Content = "心跳";
-                        //this.showmsg(userInfo(),msg);
                         this.webSocket.send(JSON.stringify(msg))
                     }
 
@@ -651,7 +639,6 @@
             },
             watch: {
                 "win": function (n, o) {
-                    // console.log("watch",o,n)
                     if (n != "main") {
                         document.getElementById("menubar").style.display = "none";
                     } else {

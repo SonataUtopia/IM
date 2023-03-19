@@ -61,9 +61,7 @@
                         userInfo(res.Data)
                         userId(res.Data.id)
                         mui.toast(res.Msg)
-                        // localStorage.setItem('userInfo', JSON.stringify(res.Data))
                         location.href = url
-                        //mui.alert(url)
                     } else {
                         mui.toast(res.Msg)
                     }

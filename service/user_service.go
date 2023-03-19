@@ -151,13 +151,14 @@ func UpdateUser(c *gin.Context) {
 }
 
 // 加载消息记录
-func RedisMsg(c *gin.Context) {
-	userIdA, _ := strconv.Atoi(c.PostForm("userIdA"))
-	userIdB, _ := strconv.Atoi(c.PostForm("userIdB"))
+func GetMsgLogging(c *gin.Context) {
+	userId, _ := strconv.Atoi(c.PostForm("userId"))
+	targetId, _ := strconv.Atoi(c.PostForm("targetId"))
 	start, _ := strconv.Atoi(c.PostForm("start"))
 	end, _ := strconv.Atoi(c.PostForm("end"))
 	isRev, _ := strconv.ParseBool(c.PostForm("isRev"))
-	res := models.RedisMsg(int64(userIdA), int64(userIdB), int64(start), int64(end), isRev)
+	isCom, _ := strconv.ParseBool(c.PostForm("isCom"))
+	res := models.GetMsgLogging(int64(userId), int64(targetId), int64(start), int64(end), isCom, isRev)
 	utils.RespOKList(c.Writer, "ok", res)
 }
 

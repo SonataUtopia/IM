@@ -24,11 +24,6 @@
             sessionStorage.setItem("userinfo",JSON.stringify(o));
         }
     }
-    var url = location.href;
-    var isOpen = url.indexOf("/login")>-1 || url.indexOf("/register")>-1
-    if (!userId() && !isOpen){
-      // location.href = "login.shtml";
-    }
 
 </script>
 
@@ -36,9 +31,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<title>IM解决方案</title>
-<meta name="Description" content="马士兵教育IM通信系统">
-<meta name="Keywords" content="无人售货机，小程序，推送，群聊,单聊app">
+<title>简易聊天系统</title>
 <link rel="stylesheet" href="/asset/plugins/mui/css/mui.css" />
 <link rel="stylesheet" href="/asset/css/chat.css" />
 <link rel="stylesheet" href="/asset/css/audio.css" />
@@ -62,9 +55,6 @@
                     }
                 };
                 var _data=[];
-                if(!! userId()){
-                   // data["userid"] = userId();
-                }
                 for(var i in data){
                     _data.push( i +"=" + encodeURI(data[i]));
                 }
