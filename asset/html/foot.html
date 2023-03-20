@@ -143,8 +143,6 @@
                 this.loadfriends();
                 this.loadcommunitys();
                 this.loaddoutures();
-                setInterval(this.heartbeat, 10 * 1000);
-                //初始化websocket
                 this.initwebsocket();
 
             },
@@ -624,18 +622,6 @@
                         this.isDisable = true;
                     }, 100)
                 },
-                heartbeat() {
-                    if (this.webSocket.readyState == 1) {  //失去连接 3
-                        var msg = this.createmsgcontext();
-                        msg.Media = -1;
-                        msg.Type = 3
-                        msg.Content = "心跳";
-                        this.webSocket.send(JSON.stringify(msg))
-                    }
-
-                }
-
-
             },
             watch: {
                 "win": function (n, o) {

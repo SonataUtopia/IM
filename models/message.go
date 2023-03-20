@@ -21,7 +21,7 @@ type Message struct {
 	gorm.Model
 	UserId     int64
 	TargetId   int64
-	Type       int    //消息类型			1.私聊	2.群聊	3.心跳
+	Type       int    //消息类型			1.私聊	2.群聊
 	Media      int    //消息内容类型		1.文字	2.表情包	3.图片	4.音频
 	Content    string //消息内容
 	CreateTime uint64 //创建时间
@@ -88,6 +88,7 @@ func Chat(writer http.ResponseWriter, request *http.Request) {
 	clientMap[userId] = node
 	rwLocker.Unlock()
 
+	node.Heartbeat()
 	//开启收发消息的协程
 	go SendProc(node)
 	go RecvProc(node)
@@ -109,12 +110,8 @@ func RecvProc(node *Node) {
 			fmt.Println("recvProc unmarshal error:", err)
 		}
 
-		if msg.Type == 3 {
-			currentTime := uint64(time.Now().Unix())
-			node.Heartbeat(currentTime)
-		} else {
-			Dispatch(data)
-		}
+		Dispatch(data)
+		node.Heartbeat()
 	}
 }
 
@@ -158,11 +155,8 @@ func SendMsg(targetId int64, msg []byte) {
 	json.Unmarshal(msg, &jsonMsg)
 	jsonMsg.CreateTime = uint64(time.Now().Unix())
 	userId := int64(jsonMsg.UserId)
-	// userIdStr := strconv.Itoa(int(jsonMsg.UserId))
-	// targetIdStr := strconv.Itoa(int(targetId))
 	if ok {
 		node.DataQueue <- msg
-		node.Heartbeat(uint64(time.Now().Unix()))
 	}
 	SaveMsgLogging(userId, targetId, msg, false)
 }
@@ -179,13 +173,9 @@ func SendGroupMsg(targetId int64, msg []byte) {
 		rwLocker.RLock()
 		node, ok := clientMap[int64(userIds[i])]
 		rwLocker.RUnlock()
-		// targetIdStr := strconv.Itoa(int(userIds[i]))
 		if ok {
 			node.DataQueue <- msg
-			node.Heartbeat(uint64(time.Now().Unix()))
 		}
-		// SendMsg(int64(userIds[i]), context, targetId)
-		// }
 	}
 
 	SaveMsgLogging(comId, 0, msg, true)
@@ -251,8 +241,8 @@ func GetMsgLogging(userId int64, targetId int64, start int64, end int64, isCom b
 }
 
 // 更新用户心跳
-func (node *Node) Heartbeat(currentTime uint64) {
-	node.HeartbeatTime = currentTime
+func (node *Node) Heartbeat() {
+	node.HeartbeatTime = uint64(time.Now().Unix())
 }
 
 // 清理超时连接
