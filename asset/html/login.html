@@ -42,14 +42,7 @@
         },
         methods:{
             login:function(){
-                //检测手机号是否正确
-                console.log("login")
-                //检测密码是否为空
-
-                //网络请求
-                //封装了promis
                 util.post("user/FindUserByNameAndPassword",this.user).then(res=>{
-                    console.log(res)
                     if(res.Code!=0){
                         mui.toast(res.Msg)
                     }else{         
@@ -58,7 +51,6 @@
                         userId(res.Data.ID)
                         mui.toast("登录成功,即将跳转")
                         location.href = url
-                        // location.href = "ToChat"
                     }
                 })
             },

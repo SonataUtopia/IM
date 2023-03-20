@@ -13,7 +13,6 @@
         uploadfile("attach/Upload", dom, function (res) {
             if (res.Code == 0) {
                 app.com.icon = res.Data;
-                console.log(res.Data);
             }
         })
     }
@@ -22,7 +21,6 @@
         uploadfile("attach/Upload", dom, function (res) {
             if (res.Code == 0) {
                 app.info.icon = res.Data;
-                console.log(res.Data);
             }
         })
     }
@@ -164,11 +162,17 @@
                 },
                 playaudio: function (url) {
                     document.getElementById('audio4play').src = url;
-                    document.getElementById('audio4play').play();
+                    var playPromise = document.getElementById('audio4play').play();
+                    if (playPromise !== undefined) {
+                    playPromise.then(_ => {
+                    video.pause();
+                    })
+                    .catch(error => {
+
+                    });}
                 },
                 startrecorder: function () {
                     event.preventDefault()
-                    console.log("startrecorder")
                     let audioTarget = document.getElementById('audio');
                     var types = ["video/webm",
                         "audio/webm",
@@ -220,7 +224,6 @@
                         this.recorder.stop();
                     }
                     this.showprocess = false
-                    console.log("stoprecorder")
                 },
                 dispatchplugin: function (item) {
                     switch (item.id) {
@@ -492,7 +495,7 @@
                         if (evt.data.indexOf("}") > -1) {
                             this.onmessage(JSON.parse(evt.data));
                         } else {
-                            console.log("recv<==" + evt.data)
+                            console.log(evt.data)
                         }
                     }.bind(this)
                     //关闭回调
@@ -559,7 +562,6 @@
                 createcommunity() {
                     this.com.ownerId = userId()
                     util.post("/contact/CreateCommunity", this.com).then(res => {
-                        console.log(res)
                         if (res.Code == 0) {
                             mui.toast(res.Msg)
                             this.loadcommunitys();
@@ -572,7 +574,6 @@
                 updateUserInfo() {
                     this.info.id = userId()
                     util.post("/user/UpdateUser", this.info).then(res => {
-                        console.log(res)
                         let userInfo = JSON.parse(sessionStorage.getItem('userinfo') || '{}');
                         userInfo.Avatar = this.info.icon;
                         userInfo.Name = this.info.name;
@@ -592,7 +593,6 @@
                     if (this.isDisable) {
                         this.setTimeFlag();
                         var that = this;
-                        console.log(that);
                         post("contact/JoinGroup", { comId: dstobj, "userId": userId() }, function (res) {
                             if (res.Code == 0) {
                                 mui.toast("添加成功");

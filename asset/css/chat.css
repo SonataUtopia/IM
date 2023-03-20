@@ -144,7 +144,7 @@ body {
 }
 
 .mui-bar-tab .mui-tab-item.mui-active {
-  color: #fb3a4e;
+  color: #66ccff;
 }
 
 .mui-bar-tab .mui-tab-item .mui-icon {
@@ -161,7 +161,7 @@ body {
 
 /* 个人中心样式 */
 .user-info .mui-table-view-cell {
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .user-info .mui-table-view-cell:after {
@@ -220,7 +220,7 @@ body {
 }
 
 .mui-bar-nav a {
-  color: #fb3a4e;
+  color: #66ccff;
 }
 
 .main-content {
@@ -273,7 +273,7 @@ body {
 }
 
 .mui-popup-button {
-  color: #fb3a4e;
+  color: #66ccff;
 }
 
 .chat-thread .chat .avatar {
@@ -315,8 +315,6 @@ body {
   padding-top: 50px;
   padding-bottom: 50px;
 }
-
-#convo .mui-scroll-wrapper .mui-scroll {}
 
 #convo .mui-scroll-wrapper .mui-scroll .mui-control-item {
   display: block;

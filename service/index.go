@@ -9,7 +9,7 @@ import (
 )
 
 func GetIndex(c *gin.Context) {
-	ind, err := template.ParseFiles("index.html", "views/chat/head.html")
+	ind, err := template.ParseFiles("asset/html/login.html", "asset/html/head.html")
 	if err != nil {
 		panic(err)
 	}
@@ -17,7 +17,7 @@ func GetIndex(c *gin.Context) {
 }
 
 func ToRegister(c *gin.Context) {
-	ind, err := template.ParseFiles("views/user/register.html")
+	ind, err := template.ParseFiles("asset/html/register.html")
 	if err != nil {
 		panic(err)
 	}
@@ -25,16 +25,16 @@ func ToRegister(c *gin.Context) {
 }
 
 func ToChat(c *gin.Context) {
-	ind, err := template.ParseFiles("views/chat/index.html",
-		"views/chat/head.html",
-		"views/chat/foot.html",
-		"views/chat/tabmenu.html",
-		"views/chat/concat.html",
-		"views/chat/group.html",
-		"views/chat/profile.html",
-		"views/chat/createcom.html",
-		"views/chat/userinfo.html",
-		"views/chat/main.html")
+	ind, err := template.ParseFiles("asset/html/index.html",
+		"asset/html/head.html",
+		"asset/html/foot.html",
+		"asset/html/tabmenu.html",
+		"asset/html/concat.html",
+		"asset/html/group.html",
+		"asset/html/profile.html",
+		"asset/html/createcom.html",
+		"asset/html/userinfo.html",
+		"asset/html/main.html")
 	if err != nil {
 		panic(err)
 	}

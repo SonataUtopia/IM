@@ -47,7 +47,7 @@
 	min-width:140px;
 	height:36px;
 	padding:0 30px 1px;
-	background:#e4162d;
+	background:#66ccff;
 	border:none;
 	line-height:32px;
 	font-size:14px;
@@ -58,13 +58,13 @@
 	border-radius:4px
 }
 .fm-button:hover {
-	background:#e4162d;
-	border-color:#e4162d;
+	background:#66ccff;
+	border-color:#66ccff;
 	border:none
 }
 .fm-button:active {
-	background:#e4162d;
-	border-color:#e4162d
+	background:#66ccff;
+	border-color:#66ccff;
 }
 .icon-notice {
 	background-color:#f1f6fa

@@ -1891,7 +1891,7 @@ input[type='submit']:enabled:active, input[type='submit'].mui-active:enabled,
     padding: 1px 5px;
 
     color: white;
-    background: red;
+    background: blue;
 }
 
 .mui-card

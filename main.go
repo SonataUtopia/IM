@@ -14,7 +14,6 @@ func main() {
 	utils.InitMySQL()
 	utils.InitRedis()
 	InitTimer()
-	// test.TsetMySql()
 	r := router.Router()
 	r.Run(viper.GetString("port.server"))
 }
